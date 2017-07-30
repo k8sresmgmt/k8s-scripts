@@ -1,0 +1,3 @@
+#/bin/sh
+wget -O /usr/local/bin/kube-controller-manager http://arlab224.austin.ibm.com:8000/_output/local/go/bin/kube-controller-manager && chmod +x /usr/local/bin/kube-controller-manager
+/usr/local/bin/kube-controller-manager --leader-elect=true --cluster-signing-key-file=/etc/kubernetes/pki/ca.key --kubeconfig=/etc/kubernetes/controller-manager.conf --root-ca-file=/etc/kubernetes/pki/ca.crt --service-account-private-key-file=/etc/kubernetes/pki/sa.key --cluster-signing-cert-file=/etc/kubernetes/pki/ca.crt --address=127.0.0.1 --use-service-account-credentials=true --controllers=*,bootstrapsigner,tokencleaner
