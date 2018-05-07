@@ -1,0 +1,13 @@
+[Unit]
+Description=kubelet: The Kubernetes Node Agent
+Documentation=http://kubernetes.io/docs/
+
+[Service]
+ExecStart=/root/kubelet
+ExecStartPre=/bin/bash -c 'wget -O /root/kubelet http://arlab224.austin.ibm.com:8000/_output/local/go/bin/kubelet && chmod +x /root/kubelet'
+Restart=always
+StartLimitInterval=0
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
