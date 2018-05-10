@@ -1,0 +1,45 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: ycsb-run-mem-crestart
+spec:
+  serviceName: "ycsb-run-mem-crestart"
+  replicas: 1
+  updateStrategy:
+    type: "RollingUpdate"
+  selector:
+    matchLabels:
+      app: ycsb-run-mem-crestart
+  template:
+    metadata:
+      labels:
+        app: ycsb-run-mem-crestart
+    spec:
+      containers:
+      - name: ycsb-run-mem-crestart
+        image: localhost:5000/ycsb-mongo-client
+        env:
+          - name: MY_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+        command: ["/bin/sh", "-c"]
+        args: ["/root/ycsb-0.12.0/bin/ycsb run mongodb -P /root/ycsb-0.12.0/workloads/workloada -P /ycsb/test-mem-crestart.dat -s > /ycsb/$MY_POD_NAME.output;/bin/bash"]
+        #command: ["/root/ycsb-0.12.0/bin/ycsb", "run"]
+        #args: ["mongodb", "-s", "-P", "/root/ycsb-0.12.0/workloads/workloada", "-P", "/ycsb/test.dat", ">", "/ycsb/$MY_PODNAME.dat"]
+        stdin: true
+        tty: true
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - name: ycsbconf
+            mountPath: /ycsb
+      tolerations:
+      - key: "node-role.kubernetes.io/master"
+        operator: "Exists"
+        effect: "NoSchedule"
+      nodeSelector:
+        node-role.kubernetes.io/master: ""
+      volumes:
+      - name: ycsbconf
+        hostPath:
+          path: /root/yaml/mongodb

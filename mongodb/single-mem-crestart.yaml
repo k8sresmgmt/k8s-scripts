@@ -1,0 +1,49 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: mongo-mem-crestart
+spec:
+  serviceName: "mongo-mem-crestart"
+  replicas: 1
+  updateStrategy:
+    type: "RollingUpdate"
+  template:
+    metadata:
+      labels:
+        role: mongo-mem-crestart
+        environment: test
+      annotations:
+        resizeAction: LiveResize
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mongo-mem-crestart
+          image: mongo
+          command:
+            - mongod
+            - "--noprealloc"
+            - "--port=27016"
+            - "--bind_ip_all"
+          ports:
+            - containerPort: 27016
+          volumeMounts:
+            - name: mongo-mem-crestart-persistent-storage
+              mountPath: /data/db
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "500M"
+            resizePolicy:
+              cpu: "RestartOnly"
+              memory: "RestartOnly"
+  volumeClaimTemplates:
+  - metadata:
+      name: mongo-mem-crestart-persistent-storage
+      annotations:
+        volume.beta.kubernetes.io/storage-class: "ceph"
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: ceph
+      resources:
+        requests:
+          storage: 100Gi

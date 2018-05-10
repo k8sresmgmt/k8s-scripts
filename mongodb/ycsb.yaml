@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ycsb
+spec:
+  containers:
+  - name: ycsb
+    image: localhost:5000/ycsb-mongo-client
+    command: ["/bin/bash"]
+    stdin: true
+    tty: true
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+      - name: ycsbconf
+        mountPath: /ycsb
+  tolerations:
+  - key: "node-role.kubernetes.io/master"
+    operator: "Exists"
+    effect: "NoSchedule"
+  nodeSelector:
+    node-role.kubernetes.io/master: ""
+  volumes:
+  - name: ycsbconf
+    hostPath:
+      path: /root/yaml/mongodb

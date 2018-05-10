@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Pod
+metadata:
+    name: ubuntu-reserved-2
+spec:
+    affinity:
+      podAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+            - key: reservation-test
+              operator: In
+              values:
+              - test
+          topologyKey: kubernetes.io/hostname
+    restartPolicy: Always
+    containers:
+    - name: ubuntu-reserved-2
+      image: ubuntu:16.04
+      command: ["/bin/bash"]
+      stdin: true
+      tty: true
+      resources:
+        limits:
+            cpu: 10
+            memory: "2Gi"
+        requests:
+            cpu: 2
+            memory: "1Gi"
+        resizePolicy:
+            cpu: "LiveResizable"
+            memory: "LiveResizable"
+    resourceReservation:
+      name: reservatoin
+      resources:
+        requests:
+          cpu: 5

@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo-live
+spec:
+  serviceName: "mongo-live"
+  replicas: 1
+  updateStrategy:
+    type: "RollingUpdate"
+  template:
+    metadata:
+      labels:
+        role: mongo-live
+        environment: test
+      annotations:
+        resizeAction: LiveResize
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mongo-live
+          image: mongo
+          command:
+            - mongod
+            - "--noprealloc"
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-live-persistent-storage
+              mountPath: /data/db
+          resources:
+            limits:
+              cpu: "500m"
+            resizePolicy:
+              cpu: "LiveResizeable"
+  volumeClaimTemplates:
+  - metadata:
+      name: mongo-live-persistent-storage
+      annotations:
+        volume.beta.kubernetes.io/storage-class: "ceph"
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: ceph
+      resources:
+        requests:
+          storage: 100Gi

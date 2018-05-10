@@ -1,0 +1,41 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: mongo-restart
+spec:
+  serviceName: "mongo-restart"
+  replicas: 1
+  updateStrategy:
+    type: "RollingUpdate"
+  template:
+    metadata:
+      labels:
+        role: mongo-restart
+        environment: test
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mongo-restart
+          image: mongo
+          command:
+            - mongod
+            - "--noprealloc"
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-restart-persistent-storage
+              mountPath: /data/db
+          resources:
+            limits:
+              cpu: "500m"
+  volumeClaimTemplates:
+  - metadata:
+      name: mongo-restart-persistent-storage
+      annotations:
+        volume.beta.kubernetes.io/storage-class: "ceph"
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: ceph
+      resources:
+        requests:
+          storage: 100Gi

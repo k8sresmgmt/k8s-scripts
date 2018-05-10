@@ -1,0 +1,49 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: mongo-mem
+spec:
+  serviceName: "mongo-mem"
+  replicas: 1
+  updateStrategy:
+    type: "RollingUpdate"
+  template:
+    metadata:
+      labels:
+        role: mongo-mem
+        environment: test
+      annotations:
+        resizeAction: LiveResize
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mongo-mem
+          image: mongo
+          command:
+            - mongod
+            - "--noprealloc"
+            - "--bind_ip_all"
+            - "--wiredTigerCacheSizeGB=0.256"
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-mem-persistent-storage
+              mountPath: /data/db
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "1G"
+            resizePolicy:
+              cpu: "LiveResizeable"
+              memory: "LiveResizeable"
+  volumeClaimTemplates:
+  - metadata:
+      name: mongo-mem-persistent-storage
+      annotations:
+        volume.beta.kubernetes.io/storage-class: "ceph"
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: ceph
+      resources:
+        requests:
+          storage: 100Gi

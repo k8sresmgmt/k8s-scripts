@@ -1,0 +1,49 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: mongo1
+spec:
+  serviceName: "mongo1"
+  replicas: 1
+  updateStrategy:
+    type: "RollingUpdate"
+  template:
+    metadata:
+      labels:
+        role: mongo1
+        environment: test
+      annotations:
+        resizeAction: LiveResize
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: mongo1
+          image: mongo
+          command:
+            - mongod
+            - "--noprealloc"
+            - "--bind_ip_all"
+            - "--wiredTigerCacheSizeGB=1"
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo1-persistent-storage
+              mountPath: /data/db
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "2G"
+            resizePolicy:
+              cpu: "Disabled"
+              memory: "Disabled"
+  volumeClaimTemplates:
+  - metadata:
+      name: mongo1-persistent-storage
+      annotations:
+        volume.beta.kubernetes.io/storage-class: "ceph"
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: ceph
+      resources:
+        requests:
+          storage: 100Gi

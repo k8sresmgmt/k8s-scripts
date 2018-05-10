@@ -1,0 +1,9 @@
+recordcount=2000000
+operationcount=6000000
+readproportion=1
+updateproportion=0
+scanproportion=0
+insertproportion=0
+measurementtype=timeseries
+timeseries.granularity=100
+mongodb.url=mongodb://mongo1-mem:27017/ycsb?w=1
