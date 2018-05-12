@@ -28,8 +28,8 @@ spec:
             cpu: 2
             memory: "1Gi"
         resizePolicy:
-            cpu: "LiveResizable"
-            memory: "LiveResizable"
+            cpu: "LiveResizeable"
+            memory: "LiveResizeable"
     resourceReservation:
       name: reservatoin
       resources:
